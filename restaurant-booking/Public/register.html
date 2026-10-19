@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Admin Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header>
+    <h1>Admin Dashboard</h1>
+</header>
+
+<div class="container">
+
+    <div class="card">
+        <h2>All Bookings</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Date</th>
+                    <th>Time</th>
+                    <th>Guests</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="tableBody"></tbody>
+        </table>
+    </div>
+
+</div>
+
+<script>
+async function loadBookings(){
+    const res = await fetch("/api/bookings");
+    const data = await res.json();
+
+    const table = document.getElementById("tableBody");
+    table.innerHTML = "";
+
+    data.forEach(b => {
+        table.innerHTML += `
+        <tr>
+            <td>${b.name}</td>
+            <td>${b.date}</td>
+            <td>${b.time}</td>
+            <td>${b.guests}</td>
+            <td>
+                <button onclick="editBooking('${b._id}')">Edit</button>
+                <button onclick="deleteBooking('${b._id}')">Delete</button>
+            </td>
+        </tr>`;
+    });
+}
+
+async function deleteBooking(id){
+    await fetch("/api/bookings/" + id, { method: "DELETE" });
+    loadBookings();
+}
+
+function editBooking(id){
+    const name = prompt("Enter new name:");
+    const guests = prompt("Enter new guests:");
+
+    fetch("/api/bookings/" + id, {
+        method: "PUT",
+        headers: {"Content-Type":"application/json"},
+        body: JSON.stringify({ name, guests })
+    }).then(loadBookings);
+}
+
+loadBookings();
+</script>
+
+</body>
+</html>
